@@ -14,7 +14,7 @@ st.set_page_config(page_title="Student AI Dashboard", layout="wide")
 model = joblib.load("model.pkl")
 
 # ---------------- ADMIN CREDENTIALS ----------------
-ADMIN_USERNAME = "admin"
+ADMIN_USERNAME = "Admin"
 ADMIN_PASSWORD = "admin123"
 
 def hash_password(password):
