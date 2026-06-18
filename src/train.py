@@ -1,33 +1,44 @@
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+from sklearn.ensemble import RandomForestRegressor
 import joblib
+import os
 
-# Load dataset
-df = pd.read_csv("../data/student_data.csv")
+# ---------------- LOAD DATA ----------------
+DATA_PATH = "data\student_data.csv"
 
-X = df[["StudyHours"]]
-y = df["Marks"]
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(" student_data.csv not found. Please place it in project root folder.")
 
-# Split dataset
+df = pd.read_csv(DATA_PATH)
+
+# ---------------- CLEAN COLUMN NAMES ----------------
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+
+print("Columns in dataset:", df.columns)
+
+# ---------------- REQUIRED COLUMNS ----------------
+required_cols = ["study_hours", "attendance", "sleep_hours", "marks"]
+
+missing_cols = [col for col in required_cols if col not in df.columns]
+
+if missing_cols:
+    raise KeyError(f"❌ Missing columns in dataset: {missing_cols}")
+
+# ---------------- FEATURES & TARGET ----------------
+X = df[["study_hours", "attendance", "sleep_hours"]]
+y = df["marks"]
+
+# ---------------- TRAIN TEST SPLIT ----------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Train model
-model = LinearRegression()
+# ---------------- MODEL ----------------
+model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-# Test model
-y_pred = model.predict(X_test)
+# ---------------- SAVE MODEL ----------------
+joblib.dump(model, "model.pkl")
 
-# Calculate accuracy
-score = r2_score(y_test, y_pred)
-
-print("R² Score:", round(score, 4))
-
-# Save model
-joblib.dump(model, "../models/student_model.pkl")
-
-print("Model saved successfully!")
+print("✅ model.pkl trained and saved successfully!")
